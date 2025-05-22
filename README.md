@@ -29,49 +29,81 @@ This test simulates a data pipeline where your application will ingest data from
 - Documentation
   - Is your solution clearly explained? We’ll review whether the accompanying information and data make it easy to understand how everything fits together.
 
-You may be asked to present or discuss some of this work during your onsite interview
+You will asked to present or discuss some of this work during your onsite interview
 
 ## Guidelines
 
 * Please time-box the exercise to a few hours only
 * If you need any help or clarification, please reach out to the First Resonance team.
 * As you proceed, use a Git repository to host all your files.
-* Submit your results as a [Git Bundle](https://utappia.org/2015/04/27/git-bundle-backup/) or a zipped file. Please send this to First Resonance (the recruiter you're working with). Do not post your git repo publicly anywhere on the internet.
+* Submit your results as a zipped file. Please send this to First Resonance (the recruiter you're working with). Do not post your git repo publicly anywhere on the internet.
 * We expect your solution to contain all the instructions to reproduce your environment
+
+---
 
 ## Project Milestones
 
-### Part 0: Setup your containerized environment
+### Project Objective
 
-docker-compose file to specify two services
-- a Postgres database container
-- an Airflow container
+Build a robust, scalable data pipeline using modern data engineering tooling. This pipeline will extract data from a public API, store it in a relational database, transform it using dbt, and expose critical datasets for analytical use. You are expected to go beyond implementation and make thoughtful design decisions around architecture, monitoring, CI/CD, and documentation.
 
-### Part I: Extract and Load Data
+### Part 0: Environment Setup
 
-Write an Airflow DAG to extract data from the API endpoint provided and load into the postgres database:
+- Define a `docker-compose.yml` with:
+  - A Postgres database container
+  - An Airflow container
+  - A dbt container (or use dbt within Airflow)
+- Implement a Makefile or shell script to stand up the environment with one command.
+- Configure environment variables securely via `.env` and Docker secrets.
 
-[SpaceX API Launch Data](https://api.spacexdata.com/v4/launches)
 
-Documentation on this endpoint can be found [here](https://github.com/r-spacex/SpaceX-API/blob/master/docs/launches/v4/all.md)
+### Part I: Data Ingestion
 
-Take care to adhere to clean coding principles and follow usual best practices, especially with regard to code readability. 
+- Create a modular and parameterized Airflow DAG to extract data from the SpaceX Launches API:
+  - [SpaceX API Launch Data](https://api.spacexdata.com/v4/launches)
+  - [API Documentation](https://github.com/r-spacex/SpaceX-API/blob/master/docs/launches/v4/all.md)
+- Load the data incrementally into a well-modeled Postgres schema.
+- Implement:
+  - Retry logic and failure notifications (Slack/email)
+  - Metadata tracking (e.g., `ingestion_log` table)
+  - Basic data quality checks using Great Expectations or similar
 
-Be sure to incorporate database design and data modeling practices as you load data into the database.
 
-### Part II: Transform data
+### Part II: Data Transformation
 
-Use dbt in a separate Airflow DAG to transform data into consumable datasets. We recommend two datasets related to (1) failed launches (count, reasons, etc) and (2) launches related to the Dragon vehicle (launches with crew members). These should be structured in a way that is consumable to business/operational groups (i.e. compiled, stand-alone datasets versus lots of joins/unions)
+- Use dbt models to create curated datasets:
+  1. **Failed Launches Dataset** – counts, reasons, categorized by year, rocket type, etc.
+  2. **Dragon Missions Dataset** – launch details including crew, mission duration, outcome.
+- Apply:
+  - Modular dbt folder structure (seed, staging, mart layers)
+  - dbt tests for nulls, uniqueness, referential integrity
+  - Documentation using `dbt docs`
 
-### Part III: Documentation
+### Part III: Deployment & CI/CD
 
-Add the following documentation to the `README` file:
+- Configure a CI/CD pipeline using GitHub Actions (or similar) to:
+  - Run linting and config validation
+  - Run dbt tests
+  - Deploy DAGs and models
+- Briefly explain your approach to:
+  - Secrets management
+  - Secure connection handling
 
-1. Explain how to run the code and the setup you documented in parts I and II.
-2. Include any packaging steps we may need to follow.
-3. Explain your approach to data modeling and transformation
+### Part IV: Documentation & Architecture
 
-Include all of the above documentation, including the `README`, along with all of your code in a git bundle that you send back to us.
+Include a detailed `README.md` or `docs/` folder with:
+
+1. **Setup Instructions**
+   - Environment installation and launch
+2. **System Architecture**
+   - Diagram and narrative of services and data flow
+3. **Design Justifications**
+   - Schema design, DAG structure, transformation logic
+4. **Scaling Plan**
+   - Approach for scaling to 10x or 100x data
+   - Suggestions for versioning or data lake integrations
+
+---
 
 ### References 
 
